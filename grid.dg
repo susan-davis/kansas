@@ -1,0 +1,512 @@
+%% grid.dg
+%% Include utils.dg when compiling or debugging.
+
+(extension version)	Grid movement v0.3, by Susan Davis (line)
+
+%% Implements free movement on a cartesian grid. The grid is divided into
+%% 10-unit squares, with diagonal squares 14 units from each other, and only
+%% one object occupying a given square.
+
+%% TODO: add an additional file that ties this back to the stdlib.dg world
+%% model, with exits and points of interest at certain coordinates or ranges.
+
+%% Copyright © 2021-2026, Susan Davis. All rights reserved. See LICENSE for
+%% licensing details.
+
+%%----------------------------------------------------------------------------
+
+~(x increases west) %% un-negate to make X increase as you go west, not east
+
+~(y increases south) %% un-negate to make Y increase as you go south not north
+
+~(storing positions in units) %% un-negage to store in units, not grid squares
+
+%% The maximum grid size is 1170 x 1170, unless you're willing to have ranges
+%% not be able to be calcuated between two distant objects, in which case you
+%% can use anything up to 16382 x 16382. (Location [16383 16383] specifies that
+%% the object has been removed from the map.) Range is measured in abstract
+%% units; you can convert these to real-world ones by whatever scaling factor
+%% you wish. For safety, starting the origin at [100 100] rather than [0 0] can
+%% prevent subtraction overflows.
+
+(global variable (map offset 100)) %% recommended safety margin
+
+(global variable (map size 1170)) %% max we can range across
+
+%%-------------------------------- INTERFACES --------------------------------
+
+%% Grid objects all bind a per-object variable ($ state $), which returns a
+%% tuple of at least two elements, specifying the object's X-Y position. Other
+%% modules may add more elements to the tuple.
+
+(interface (grid object $))
+
+(interface ($<GridObject position $>Position))
+
+(interface ($<GridObject x $>PX))
+
+(interface ($<GridObject y $>PY))
+
+%% Positions and coordinates
+
+(interface (place $<Object at $<Position)) %% teleport to another square
+
+(interface ($<GridObject is on the map))
+
+(interface (position $<Position is on the map))
+
+(interface (position $<Position is off the map))
+
+(interface (remove $<GridObject from the map))
+
+(interface (position $<Here equals position $<There))
+
+(interface (position $<Here precisely equals position $<There))
+
+(interface ($<Object is at the same position as $<Target))
+
+(interface ($<Object is at precisely the same position as $<Target))
+
+(interface (object at $<Position into $>Obj)) %% first object if more than one
+
+(interface (objects at $<Position into $>List))
+
+(interface (number of objects at $<Position into $>Num))
+
+(interface (another object can move to $<Position))
+
+(interface ($<Object can jump $<Num obstacles)) %% 16383 = unlimited
+
+%% Most other games use floating point numbers, floating point math,
+%% trignometry, square roots, and so forth, to get ranges and bearings
+%% actually right. We're restricted to unsigned integers, so we simplify
+%% down to integers (10/square, or 14 diagonally), and use a lookup table.
+
+(interface (calculate range from $<Here to $<There into $>Range))
+
+(interface (range from $<Object to $<Target into $>Range))
+
+%% Simple 8-way directions
+
+(interface (direction from $<Here to $<There into $>Direction))
+
+(interface (target $<Target is $>Direction of $<Object))
+
+%% Moving on the grid
+
+(interface ($<Object moves $<Num squares $<Direction)) %% raw squares
+
+(interface ($<Object moves $<Num units $<Direction)) %% adjusted for diagonal
+
+(interface ($<Object moves $<Num squares toward position $<Destination))
+
+(interface ($<Object moves $<Num units toward position $<Destination))
+
+(interface ($<Object moves $<Num squares toward target $<Target))
+
+(interface ($<Object moves $<Num units toward target $<Target))
+
+%% ------------------------------ STATE ------------------------------
+
+($Object x $X)
+    ($Object is on the map)
+	($Object position $Position)
+	(nth $Position 1 $X)
+
+($Object y $Y)
+    ($Object is on the map)
+	($Object position $Position)
+	(nth $Position 2 $Y)
+
+%% ------------------------------ POSITIONS ------------------------------
+
+(maximum coordinate value $Max)
+	(map offset $Offset)
+	(map size $Size)
+	($Size plus $Offset into $Max)
+
+($Object is on the map)
+    ($Object position $Position)
+	(position $Position is on the map)
+
+(position $Place is on the map)
+	(fully bound $Place)
+	([$X $Y | $] = $Place)
+	(map offset $O)
+	(maximum coordinate value $M)
+	(if) (storing positions in units) (then)
+	    ($O times 10 into $Offset)
+		($M times 10 into $Product)
+		($Product plus 9 into $Max)
+	(else)
+	    ($Offset = $O)
+	    ($Max = $M)
+	(endif)
+	~($X < $Offset) ~($Y < $Offset)
+	~($X > $Max) ~($Y > $Max)
+
+(position $Place is off the map)
+	~(position $Place is on the map)
+
+(place $Object at $Place)
+	(if) ($Object position $Position) (then)
+		([$ $ | $Tail] = $Position)
+	(else)
+		([$ $ | $Tail] = $Place)
+	(endif)
+	([$X $Y | $] = $Place)
+	([$X $Y | $Tail] = $NewPosition)
+	(fully bound $NewPosition)
+	(now) ($Object position $NewPosition)
+
+(remove $Object from the map)
+	(place $Object at [16383 16383])
+
+(position $Here equals position $There) %% round off units
+	([$X1 $Y1 | $] = $Here)
+	([$X2 $Y2 | $] = $There)
+	(if) (storing positions in units) (then)
+	    ($X1 divided by 10 into $HereX)
+	    ($Y1 divided by 10 into $HereY)
+	    ($X2 divided by 10 into $ThereX)
+	    ($Y2 divided by 10 into $ThereY)
+	    ([$HereX $HereY] = [$ThereX $ThereY])
+	(else)
+	    ([$X1 $Y1] = [$X2 $Y2])
+	(endif)
+
+($Object is at the same position as $Target)
+	($Object position $Here)
+	($Target position $There)
+	(position $Here equals position $There)
+
+(position $Here precisely equals position $There)
+	([$X1 $Y1 | $] = $Here)
+	([$X2 $Y2 | $] = $There)
+    ([$X1 $Y1] = [$X2 $Y2])
+
+($Object is at precisely the same position as $Target)
+	($Object position $Here)
+	($Target position $There)
+	(position $Here precisely equals position $There)
+
+(object at $Here into $Obj)
+	*(grid object $Obj)
+	($Obj position $There)
+	(position $Here equals position $There)
+
+(objects at $Here into $List)
+    (collect $Obj) {
+	    *(grid object $Obj)
+        ($Obj position $There)
+		(position $Here equals position $There)
+	} (into $List)
+
+(number of objects at $Position into $Num)
+    (objects at $Position into $List)
+	(length of $List into $Num)
+
+%% ------------------------- SQUARES AND COLLISIONS -------------------------
+
+($Num north from $Y into $NY)
+	(if) (y increases south) (then)
+		($Y minus $Num into $NY)
+	(else)
+		($Y plus  $Num into $NY)
+	(endif)
+
+($Num south from $Y into $NY)
+	(if) (y increases south) (then)
+		($Y plus  $Num into $NY)
+	(else)
+		($Y minus $Num into $NY)
+	(endif)
+
+($Num east from $X into $NX)
+	(if) (x increases west) (then)
+		($X minus $Num into $NX)
+	(else)
+		($X plus  $Num into $NX)
+	(endif)
+
+($Num west from $X into $NX)
+	(if) (x increases west) (then)
+		($X plus  $Num into $NX)
+	(else)
+		($X minus $Num into $NX)
+	(endif)
+
+(coordinates $Num $Relation from $X $Y into $NX $NY)
+	(fully bound $X) (fully bound $Y)
+	(if) ($Relation = #north) (then)
+		($X = $NX)
+		($Num north from $Y into $NY)
+	(elseif) ($Relation = #northeast) (then)
+		($Num east  from $X into $NX)
+		($Num north from $Y into $NY)
+	(elseif) ($Relation = #east)      (then)
+		($Num east  from $X into $NX)
+		($Y = $NY)
+	(elseif) ($Relation = #southeast) (then)
+		($Num east  from $X into $NX)
+		($Num south from $Y into $NY)
+	(elseif) ($Relation = #south)     (then)
+		($X = $NX)
+		($Num south from $Y into $NY)
+	(elseif) ($Relation = #southwest) (then)
+		($Num west  from $X into $NX)
+		($Num south from $Y into $NY)
+	(elseif) ($Relation = #west)      (then)
+		($Num west  from $X into $NX)
+		($Y = $NY)
+	(elseif) ($Relation = #northwest) (then)
+		($Num west  from $X into $NX)
+		($Num north from $Y into $NY)
+	(endif)
+
+($Squares squares $Relation from $Place into $Result)
+	([$X $Y | $Tail] = $Place)
+	(if) (storing positions in units) (then)
+	    ($Squares times 10 into $Num)
+	(else)
+	    ($Squares = $Num)
+	(endif)
+	(coordinates $Num $Relation from $X $Y into $NX $NY)
+	([$NX $NY | $Tail] = $Result)
+
+(next square $Relation from $Place into $Result)
+    (1 squares $Relation from $Place into $Result)
+
+%%----------------------------------- RANGE -----------------------------------
+
+%% No square roots, so no Pythagorean Theorem, so we use a lookup table here.
+
+(look up range for 1 1 into 141)
+(look up range for 1 2 into 224)
+(look up range for 2 2 into 283)
+(look up range for 1 3 into 316)
+(look up range for 2 3 into 361)
+(look up range for 3 3 into 424)
+(look up range for 1 4 into 412)
+(look up range for 2 4 into 447)
+(look up range for 3 4 into 500)
+(look up range for 4 4 into 566)
+(look up range for 1 5 into 510)
+(look up range for 2 5 into 539)
+(look up range for 3 5 into 583)
+(look up range for 4 5 into 640)
+(look up range for 5 5 into 707)
+(look up range for 1 6 into 608)
+(look up range for 2 6 into 632)
+(look up range for 3 6 into 671)
+(look up range for 4 6 into 721)
+(look up range for 5 6 into 781)
+(look up range for 6 6 into 849)
+(look up range for 1 7 into 707)
+(look up range for 2 7 into 728)
+(look up range for 3 7 into 762)
+(look up range for 4 7 into 806)
+(look up range for 5 7 into 860)
+(look up range for 6 7 into 922)
+(look up range for 7 7 into 990)
+(look up range for 1 8 into 806)
+(look up range for 2 8 into 825)
+(look up range for 3 8 into 854)
+(look up range for 4 8 into 894)
+(look up range for 5 8 into 943)
+(look up range for 6 8 into 1000)
+(look up range for 7 8 into 1063)
+(look up range for 8 8 into 1131)
+(look up range for 1 9 into 906)
+(look up range for 2 9 into 922)
+(look up range for 3 9 into 949)
+(look up range for 4 9 into 985)
+(look up range for 5 9 into 1030)
+(look up range for 6 9 into 1082)
+(look up range for 7 9 into 1140)
+(look up range for 8 9 into 1204)
+(look up range for 9 9 into 1273)
+(look up range for 1 10 into 1005)
+(look up range for 2 10 into 1020)
+(look up range for 3 10 into 1044)
+(look up range for 4 10 into 1077)
+(look up range for 5 10 into 1118)
+(look up range for 6 10 into 1166)
+(look up range for 7 10 into 1221)
+(look up range for 8 10 into 1280)
+(look up range for 9 10 into 1345)
+(look up range for 10 10 into 1414)
+
+(look up range for 0 $Y into $Result)
+    (100 times $Y into $Result)
+
+(look up range for $DX $DY into $Result)
+    ($DX < 11) ($DY < 11)
+	(sort $DX $DY into $X $Y)
+	(look up range for $X $Y into $Result)
+
+(calculate range $DX $DY $Range)
+	(split $DX into $XThousands $XHundreds $XTens $XOnes)
+	(split $DY into $YThousands $YHundreds $YTens $YOnes)
+	(look up range for $XThousands $YThousands into $RangeThousands)
+	(look up range for $XHundreds $YHundreds into $RangeHundreds)
+	(look up range for $XTens $YTens into $Tens)
+	(look up range for $XOnes $YOnes into $RangeOnes)
+	($RangeThousands times 100 into $Thousands)
+	($RangeHundreds times 10 into $Hundreds)
+	($RangeOnes divided by 10 into $Ones)
+	($Thousands plus $Hundreds into $Sum1)
+	($Tens plus $Ones into $Sum2)
+	($Sum1 plus $Sum2 into $Range)
+
+(calculate range for $DX $DY into $Range)
+    (storing positions in units)
+	($DX < 10) ($DY < 10)
+	(look up range for $DX $DY into $RawRange)
+    ($RawRange divided by 100 into $Range rounding evenly)
+
+(calculate range for $DiffX $DiffY into $Range)
+    (storing positions in units)
+    ($DiffX divided by 10 into $DX)
+	($DiffY divided by 10 into $DY)
+	(calculate range $DX $DY $Range)
+
+(calculate range for $DX $DY into $Range)
+	(calculate range $DX $DY $Range)
+
+(calculate range from $Here to $There into $Range)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+    (calculate range for $DX $DY into $Range)
+
+(range from $Ship to $Target into $Range)
+	($Ship   position $Here)
+	($Target position $There)
+	(calculate range from $Here to $There into $Range)
+
+%%--------------------------------- DIRECTION ---------------------------------
+
+($Y1 is north of $Y2)
+    (if) (y increases south) (then)
+	    ($Y1 < $Y2)
+	(else)
+	    ($Y1 > $Y2)
+	(endif)
+
+($X1 is east of $X2)
+    (if) (x increases west) (then)
+	    ($X1 < $X2)
+	(else)
+	    ($X1 > $X2)
+	(endif)
+
+(octant from $Here to $There into $Octant)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+	(if) ($TX is east of $HX) (then)
+		(if) ($TY is north of $HY) (then)
+			(if) ($DY > $DX) (then)
+				($Octant = 1)
+			(else)
+				($Octant = 2)
+			(endif)
+		(else)
+			(if) ($DY < $DX) (then)
+				($Octant = 3)
+			(else)
+				($Octant = 4)
+			(endif)
+		(endif)
+	(else)
+		(if) ($TY is north of $HY) (then)
+			(if) ($DY < $DX) (then)
+				($Octant = 7)
+			(else)
+				($Octant = 8)
+			(endif)
+		(else)
+			(if) ($DY > $DX) (then)
+				($Octant = 5)
+			(else)
+				($Octant = 6)
+			(endif)
+		(endif)
+	(endif)
+
+(ortho 1 #north)
+(diag  1 #northeast)
+(ortho 2 #east)
+(diag  2 #northeast)
+(ortho 3 #east)
+(diag  3 #southeast)
+(ortho 4 #south)
+(diag  4 #southeast)
+(ortho 5 #south)
+(diag  5 #southwest)
+(ortho 6 #west)
+(diag  6 #southwest)
+(ortho 7 #west)
+(diag  7 #northwest)
+(ortho 8 #north)
+(diag  8 #northwest)
+
+(direction from $Here to $There into $Direction)
+    (octant from $Here to $There into $Octant)
+	([$HX $HY | $] = $Here)
+	([$TX $TY | $] = $There)
+	($HX delta $TX into $DX)
+	($HY delta $TY into $DY)
+    (sort $DX $DY into $Little $Big)
+    ($Little times 5 into $Diag) %% 5:2 ratio == 22 degrees, half of 45
+	($Big times 2 into $Ortho)
+	(if) ($Diag > $Ortho) (then)
+	    (diag  $Octant $Direction)
+	(else)
+	    (ortho $Octant $Direction)
+	(endif)
+
+(target $Target is $Direction of $Object)
+    ($Object position $Here)
+	($Target position $There)
+	(direction from $Here to $There into $Direction)
+
+%%--------------------------------- MOVEMENT ----------------------------------
+
+($Object moves to square $There)
+    ($Object position $Here)
+	([$ $ | $Tail] = $Here)
+	([$X $Y | $]     = $There)
+	([$X $Y | $Tail] = $New)
+    (fully bound $New)
+	(now) ($Object position $New)
+
+($ moves 0 squares $) %% do nothing
+
+($Object moves $Num squares $Direction)
+    (grid object $Object)
+    ($Object position $Here)
+	($Num squares $Direction from $Here into $There)
+	($Object moves to square $There)
+
+($ moves $ squares $) %% don't move if the above fails somehow
+
+($Units units is $Squares squares orthogonally)
+    ($Units divided by 10 into $Squares rounding evenly)
+
+($Units units is $Squares squares diagonally)
+    ($Units divided by 14 into $Squares rounding evenly)
+
+($Object moves $Num units $Direction)
+    (grid object $Object)
+    (if) ($Direction is one of [#northeast #northwest #southeast #southwest])
+    (then)
+        ($Num units is $Squares squares diagonally)
+    (else)
+        ($Num units is $Squares squares orthogonally)
+    (endif)
+    ($Object moves $Squares squares $Direction)
+    %% TODO: move by individual units for shuttles etc.

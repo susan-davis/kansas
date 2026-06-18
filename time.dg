@@ -1,0 +1,379 @@
+%% time.dg
+%% Handles time and date, provided here as an example of how to use unit.dg.
+
+%% Supports Gregorian CE dates from 1753 to 16383 CE only, or from as early as
+%% 1583 in countries that switched calendars before the British did. We also
+%% assume that January 1 is the start of the new year, which wasn't true
+%% everywhere until 1918; again, you'll need to hack this to support games set
+%% in locales for which New Year's was still on March 25.
+
+(extension version)	Gregorian time and date v0.2, by Susan Davis (line)
+
+%% Copyright © 2021-2026, Susan Davis. All rights reserved. See license.txt or
+%% LICENSE for licensing details.
+
+%%----------------------------------------------------------------------------
+
+(global variable (current datetime $)) %% [time day-of-year year]
+
+(global variable (january starts on $)) %% day of week on New Year's day
+
+(global variable (minutes per tick 1)) %% default number of minutes per move
+
+%% negate to get D-M-Y dates
+(using north american dates)
+
+%% override for a different time zone
+(timezone letter)	Z
+
+%% negate to stop time from advancing on every tick
+(time is running)
+
+%%-------------------------------- INTERFACES --------------------------------
+
+(interface (set time $<Time))
+
+(interface (set time $<Hour $<Minute))
+
+(interface ($>Hours hours $>Minutes minutes))
+
+(interface (set date $<Day $<Month $<Year))
+
+(interface (day $>Day month $>Month year $>Year))
+
+(interface (clock time))
+
+(interface (clock time for $<Timestamp))
+
+(interface (military time))
+
+(interface (military time for $<Timestamp))
+
+(interface (short date))
+
+(interface (short date for $<Date))
+
+(interface (full date))
+
+(interface (full date for $<Date))
+
+(interface (full date with weekday))
+
+(interface (full date with weekday for $<Date))
+
+(interface (nato time))
+
+(interface (nato time for $<Timestamp))
+
+(interface (elapse $<Num minutes))
+
+(interface (elapse $<Num hours))
+
+(interface (elapse $<Num days))
+
+(interface (elapse $<Num months))
+
+(interface (elapse $<Num years))
+
+%%------------------------------ IMPLEMENTATION ------------------------------
+
+($Hours hours $Minutes minutes for $Time)
+	($Time divided by 60 into $Hours)
+	($Time modulo 60 into $Minutes)
+
+($H hours $M minutes)
+	(current datetime [$Time $ $])
+	($H hours $M minutes for $Time)
+
+(day $Day month $Month year $Year for $Timestamp)
+	([$ $D $Year] = $Timestamp)
+	(day $D of $Year is $Month $Day)
+
+(day $Day month $Month year $Year)
+	(current datetime $Timestamp)
+	(day $Day month $Month year $Year for $Timestamp)
+
+($Year is a leap year)
+	($Year modulo 4 into 0)
+	($Year modulo 400 into 0)
+
+($Year is a leap year)
+	($Year modulo 4 into 0)
+	~($Year modulo 100 into 0)
+
+(length of year $Year into 365)
+	~($Year is a leap year)
+
+(length of year $Year into 366)
+	($Year is a leap year)
+
+(days in 1 into 31 for $)
+(days in 3 into 31 for $)
+(days in 4 into 30 for $)
+(days in 5 into 31 for $)
+(days in 6 into 30 for $)
+(days in 7 into 31 for $)
+(days in 8 into 31 for $)
+(days in 9 into 30 for $)
+(days in 10 into 31 for $)
+(days in 11 into 30 for $)
+(days in 12 into 31 for $)
+
+(days in 2 into 28 for $Year)
+	~($Year is a leap year)
+
+(days in 2 into 29 for $Year)
+	($Year is a leap year)
+
+($M $D in $Year is really $Month $Day)
+	(days in $M into $Length for $Year)
+	(if) ($D > $Length) (then)
+		($M plus 1 into $NM)
+		($D minus $Length into $ND)
+		($NM $ND in $Year is really $Month $Day)
+	(else)
+		($Day = $D)
+		($Month = $M)
+	(endif)
+
+(day $Date of $Year is $Month $Day)
+	(1 $Date in $Year is really $Month $Day)
+
+(1 $Day is day $Day of $)
+
+($Month $Day is day $Date of $Year)
+	($Month minus 1 into $NewMonth)
+	(days in $NewMonth into $Days for $Year)
+	($Day plus $Days into $NewDay)
+	($NewMonth $NewDay is day $Date of $Year)
+
+%% Calculate the weekday for New Year's from first principles, for after a big
+%% time jump.
+
+(january $Year starts on $Weekday)
+	($Year modulo 400 into $CycleYear)
+	($CycleYear divided by 100 into $Centuries)
+	($Centuries times 5 into $CenturyDays) %% 100+(25-1) mod 7 = 5
+	($CycleYear modulo 100 into $Remaining)
+	($Remaining divided by 4 into $LeapYears)
+	($Remaining plus $LeapYears into $RemainingDays)
+	($RemainingDays plus $CenturyDays into $TotalDays)
+	($TotalDays modulo 7 into $Weekday)
+
+(leading zero $Num)
+	(if) ($Num < 10) (then)
+		0 (no space)
+	(endif)
+	$Num
+
+(clock time)
+	(current datetime $Time)
+	(clock time for $Time)
+
+(clock time for [$Time $ $])
+	(clock time for $Time)
+
+(clock time for $Time)
+	(number $Time)
+	($H hours $Minutes minutes for $Time)
+	($H modulo 12 into $Hr)
+	(if) ($Hr = 0) (then)
+		($Hours = 12)
+	(else)
+		($Hr = $Hours)
+	(endif)
+	$Hours : (no space)
+	(leading zero $Minutes)
+	(if) ($H > 11) (then)
+		PM
+	(else)
+		AM
+	(endif)
+
+(military time)
+	(current datetime $Time)
+	(military time for $Time)
+
+(military time for [$Time $ $])
+	(military time for $Time)
+
+(military time for $Time)
+	(number $Time)
+	($H hours $M minutes for $Time)
+	(leading zero $H) : (leading zero $M)
+
+(short date)
+	(current datetime $Date)
+	(short date for $Date)
+
+(short date for $Date)
+	($Date = [$ $Day $Y])
+	(day $Day of $Y is $M $D)
+	(if) (using north american dates) (then)
+		$M \/ $D \/ $Y
+	(else)
+		$D - $M - $Y
+	(endif)
+
+(month for 1)	January
+(month for 2)	February
+(month for 3)	March
+(month for 4)	April
+(month for 5)	May
+(month for 6)	June
+(month for 7)	July
+(month for 8)	August
+(month for 9)	September
+(month for 10)	October
+(month for 11)	November
+(month for 12)	December
+
+(full date)
+	(current datetime $Date)
+	(full date for $Date)
+
+(full date for $Date)
+	($Date = [$ $Day $Y])
+	(day $Day of $Y is $M $D)
+	(if) (using north american dates) (then)
+		(month for $M) $D, $Y
+	(else)
+		$D (month for $M), $Y
+	(endif)
+
+(weekday for 0)	Sunday
+(weekday for 1)	Monday
+(weekday for 2)	Tuesday
+(weekday for 3)	Wednesday
+(weekday for 4)	Thursday
+(weekday for 5)	Friday
+(weekday for 6)	Saturday
+
+(weekday for $Date)
+	($Date = [$ $D $])
+	($D minus 1 into $Day)
+	(january starts on $First)
+	($Day plus $First into $Sum)
+	($Sum modulo 7 into $Weekday)
+	(weekday for $Weekday)
+
+(full date with weekday)
+	(current datetime $Date)
+	(full date with weekday for $Date)
+
+(full date with weekday for $Date)
+	(weekday for $Date) (no space) , (full date for $Date)
+
+(mon for 1)		Jan
+(mon for 2)		Feb
+(mon for 3)		Mar
+(mon for 4)		Apr
+(mon for 5)		May
+(mon for 6)		Jun
+(mon for 7)		Jul
+(mon for 8)		Aug
+(mon for 9)		Sep
+(mon for 10)	Oct
+(mon for 11)	Nov
+(mon for 12)	Dec
+
+(nato time for [$Time $Day $Year])
+	($H hours $M minutes for $Time)
+	(day $Day of $Year is $Month $D)
+	(leading zero $D) (no space)
+	(leading zero $H) (no space)
+	(leading zero $M) (no space)
+	(timezone letter)
+	(mon for $Month)
+	($Year modulo 100 into $YY)
+	(leading zero $YY)
+
+(nato time)
+	(current datetime $Now)
+	(nato time for $Now)
+
+(normalize $Timestamp into $NewTimestamp)
+	([$Time $Date $Year] = $Timestamp)
+	(if) ($Time > 1439) (then)
+		($Time divided by 1440 into $Days)
+		($Time modulo 1440 into $NewTime)
+		($Date plus $Days into $NewDate)
+    (else)
+		($NewTime = $Time)
+		($NewDate = $Date)
+	(endif)
+	(length of year $Year into $Length)
+	(if) ($NewDate > $Length) (then)
+		($NewDate minus $Length into $NewDateMinusLength)
+		($Year plus 1 into $NewYear)
+		(normalize [$NewTime $NewDateMinusLength $NewYear] into $NewTimestamp)
+	(else)
+		($NewTimestamp = [$NewTime $NewDate $Year])
+	(endif)
+
+(set time $Timestamp)
+	(current datetime $Then)
+	([$ $ $OldYear] = $Then)
+	(normalize $Timestamp into $Now)
+	(now) (current datetime $Now)
+	([$ $ $NewYear] = $Now)
+	(if) ~($OldYear = $NewYear) (then)
+		(january $NewYear starts on $Weekday)
+		(now) (january starts on $Weekday)
+	(endif)
+
+(set time $Hour $Minute)
+	(current datetime [$ $Day $Year])
+	($Hour times 60 into $SixtyMinutes)
+	($SixtyMinutes plus $Minute into $Time)
+	(set time [$Time $Day $Year])
+
+(set date $Day $Month $Year)
+	(current datetime [$Time $ $])
+	($Month $Day is day $Date of $Year)
+	(set time [$Time $Date $Year])
+
+(elapse $Y years)
+	(current datetime [$Time $Day $Year])
+	(16383 minus $Year into $Max)
+	~($Y > $Max)
+	($Year plus $Y into $Future)
+	(set time [$Time $Day $Future])
+
+(elapse $M months)
+	($M < 16372) %% maximum before arithmetic overflow
+	(current datetime [$Time $Date $Year])
+	(day $Date of $Year is $Month $Day)
+	($Month plus $M into $Sum)
+	($Sum divided by 12 into $AddedYears)
+	($Sum modulo 12 into $NewMonth)
+	($Year plus $AddedYears into $NewYear)
+	($NewMonth $Day is day $NewDate of $NewYear)
+	(set time [$Time $NewDate $NewYear])
+
+(elapse $D days)
+	($D < 16018) %% maximum before arithmetic overflow
+	(current datetime [$Time $Now $Year])
+	($Now plus $D into $Day)
+	(set time [$Time $Day $Year])
+
+(elapse $H hours)
+	($H divided by 24 into $Days)
+	(elapse $Days days)
+	($H modulo 24 into $Hours)
+	($Hours times 60 into $Minutes)
+	(elapse $Minutes minutes)
+
+(elapse $Num minutes)
+	(current datetime [$T $D $Year])
+	($Num divided by 1440 into $Days)
+	($Num modulo 1440 into $Minutes)
+	($D plus $Days into $Day)
+	($T plus $Minutes into $Time)
+	(set time [$Time $Day $Year])
+
+(late on every tick)
+	(if) (time is running) (then)
+		 (minutes per tick $Rate)
+		 (elapse $Rate minutes)
+	(endif)
