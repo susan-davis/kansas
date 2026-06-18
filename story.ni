@@ -39,7 +39,7 @@ When play begins:
 	say paragraph break;
 	say "One of the most striking themes that emerged from the research for this game was just how astonishingly racist (by 21st Century standards) the United States of the mid-19th Century was.  Nearly all of white America believed in stereotypes about African-Americans that have long since been discredited, and the political discourse of the day reflected those ideas.  Even opponents of slavery held views that would be considered offensively racist today, sometimes even more so than their pro-slavery opponents.";
 	say paragraph break;
-	say "This game is based on true events.  It attempts to portray its subject matter as accurately as possible.  To do so, it includes racist language.  The attitudes about race expressed by the characters in the game are emphatically [bold type]NOT[roman type] those of the author, and in many cases are quoted [italic type]verbatim[roman type] from contemporary accounts.";
+	say "This game is based on true events.  It attempts to portray its subject matter as accurately as possible.  The attitudes about race expressed by the characters in the game are emphatically [bold type]NOT[roman type] those of the author, and in many cases are quoted [italic type]verbatim[roman type] from contemporary accounts.";
 	pause the game;
 	change the left hand status line to "[map region of the location], KT ";
 	change the right hand status line to "[the current date]";
