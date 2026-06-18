@@ -3,7 +3,14 @@
  :build
  {:zblorb
   {:options ["--cover"     "tragic-prelude.png"
-             "--cover-alt" "the mural Tragic Prelude, by John Steuart Curry"]}}
+             "--cover-alt" "The 1942 mural Tragic Prelude, by John Steuart
+	                    Curry. Wild-eyed, wild-haired John Brown, larger
+			    than life, completely fills the frame, arms wide,
+			    holding a rifle and a bible in either hand, and
+			    shouting something. Below him, to either side, 19th
+			    Century armed men square off, flying Union and
+			    Confederate flags. The dead are piled at Brown's
+			    feet."]}}
  :sources
  {:main    ["src/meta.dg" "src/kansas.dg"]
   :test    ["src/unit-tests.dg" "src/unit.dg"]
