@@ -6,3 +6,8 @@
 *.aastory
 *.out
 log.txt
+out
+.cache
+.DS_Store
+.lsp 
+.clj-kondo/cache

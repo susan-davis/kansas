@@ -1,0 +1,11 @@
+{:name   "kansas"
+ :target :zblorb
+ :build
+ {:zblorb
+  {:options ["--cover"     "cover.png"
+             "--cover-alt" "John Brown"]}}
+ :sources
+ {:main    ["src/meta.dg" "src/kansas.dg"]
+  :test    ["src/unit-tests.dg" "src/unit.dg"]
+  :debug   ["src/stddebug.dg"]
+  :library ["src/stdlib.dg"]}}
