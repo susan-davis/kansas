@@ -2,7 +2,7 @@
  :target :zblorb
  :build
  {:zblorb
-  {:options ["--cover"     "tragic-prelude.jpg"
+  {:options ["--cover"     "tragic-prelude.png"
              "--cover-alt" "John Brown"]}}
  :sources
  {:main    ["src/meta.dg" "src/kansas.dg"]
