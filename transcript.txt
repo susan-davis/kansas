@@ -1,0 +1,171 @@
+SAMPLE TRANSCRIPT
+
+Foreword
+
+One of the most striking themes that emerged from the research for this 
+game was just how astonishingly racist (by 21st Century standards) the 
+United States of the mid-19th Century was.  Nearly all of white America 
+believed in stereotypes about African-Americans that have long since been 
+discredited, and the political discourse of the day reflected those ideas.  
+Even opponents of slavery held views that would be considered offensively 
+racist today, sometimes even more so than their pro-slavery opponents.
+
+This game is based on true events.  It attempts to portray its subject
+matter as accurately as possible.  The attitudes about race expressed by 
+the characters in the game are emphatically NOT those of the author, and 
+in many cases are quoted verbatim from contemporary accounts.
+
+[Press RETURN to continue.]
+
+The sun has gone down, but the heat hasn't.  The air hangs sticky and humid
+in your one-room cabin, and the night sky outside is lit up now and again by 
+heat lightning.
+
+Claim Cabin
+
+The cabin is built of rough wooden "shakes", with visible gaps between them
+through which the faintest hint of a breeze blows.  You haven't gotten around
+to installing proper windows or a door yet -- cotton curtains do the job for
+now.  They're tucked out of the way to try to encourage what fitful breeze 
+there is to help cool the cabin.  It isn't helping much.
+
+Drury is back from Dutch Henry's with "big news" for you and your father.
+The three of you huddle around the lantern and try to keep your voices to
+hushed whispers to avoid waking Maw and Will.
+
+"...so what does Sheriff Jones do?" asks Drury, rhetorically.  "He gathers 
+hisself up a posse and rides right smack into Lawrence to arrest the whole
+lot of them."
+
+"Them New England boys -- did they fight 'im?" asks Paw.
+
+Outside, you can hear Atchison barking at something.
+
++---
+| 1. "I hope Jones shot 'em full o'holes!"
+| 2. "What's wrong with Atchison?"
++---
+
+> OUT
+
+You've been waiting all day to hear the news.  You're not about to miss
+it now.
+
++---
+| 1. "I hope Jones shot 'em full o'holes!"
+| 2. "What's wrong with Atchison?"
++---
+
+> EXAMINE MAW
+
+In the dim light of the lantern, your mother and youngest brother are 
+barely distinguishable from the sacks of flour and meal piled beside
+them.
+
++---
+| 1. "I hope Jones shot 'em full o'holes!"
+| 2. "What's wrong with Atchison?"
++---
+
+> EXAMINE PAW
+
+Everyone always tells you that you're the spitting image of your father.  If 
+so, then you have hollow cheeks, laugh lines around your eyes, and scraggly 
+grey whiskers.
+
+"Naw," replies Drury.  "Jones and his boys rode right in, arrested Robinson 
+and the rest of his crew, and blew that damned hotel of theirs to Kingdom 
+Come."
+
+"What'd I tell you?" asks Paw.  "They're yeller!  I bet half of them have
+skedaddled by now, and won't stop running until they get all the way back to 
+Boston."
+
+Atchison's barking recedes into the distance as he runs after something.
+
++---
+| 1. "Serves 'em right."
+| 2. "Maybe now we'll have some peace."
+| 3. "Wait -- the sheriff blew up a hotel?!"
+| 4. "What's wrong with Atchison?"
++---
+
+> EXAMINE DRURY
+
+Your younger brother is slightly more thickly-built than you, and somewhat
+thicker, too, in the head.  Unlike your father and you, he is clean-shaven,
+and perpetually wears a lazy grin that borders on a smirk.
+
+The lightning flashes again in the sky outside.
+
+"'Bout time them Yankees was run off," says Drury.  "They's just here to
+steal our niggers, and the whole durned Territory, too, if we're not careful."
+
+"And it's high time we run off them Abolition folks around here, too,"
+says your father.  "Now, listen.  Tomorrow, I want you boys to--"
+
+"Damn it!" cries a strange man's voice outside the cabin.  "Stupid dog!"
+
+You hear Atchison growl, then yelp in pain.
+
++---
+| 1. "What was that?"
++---
+
+> OUT
+
+Homestead
+
+Your little cabin sits on the open prairie beside the fields that you and
+Drury have spent the last week clearing and plowing.  A few rods away to
+the north and east, you can see the trees down by the creek.  Rolling
+grassy hills stretch to the horizon in all other directions.  A road runs
+east, toward the Shermans', and west, into the prairie.
+
+You quickly discover the source of Atchison's barking: outside your cabin
+are five men brandishing swords.  You recognize the men instantly: it's John
+Brown, the neighborhood troublemaker, and the one who Paw probably had
+most in mind to "run off," along with four of his boys.
+
+In the distance to the north, you can make out three more men -- it's too 
+dark to tell who -- holding enough horses for Brown's entire party.  One 
+of them strikes Atchison with a cavalry sabre.  Your dog crumples to the 
+ground in a heap.
+
+"Boy, where is your father?" asks Brown.
+
++---
+| 1. "What's this all about?"
+| 2. "He's inside.  I'll get him."
+| 3. "He ain't here.  Now get off our land!"
+| 4. "My dog!  You'll pay for this, you bastards!"
++---
+
+> EXAMINE BROWN
+
+A grim-faced man in his mid-fifties, thin and owlish.  His hair is silver, 
+and his eyes glint with a cold light.  He has a Colt's patent revolver 
+tucked into the belt of his trousers.
+
+"Doyle!" calls Brown.  "James Doyle!  We know you're in there.  Come out!"
+
++---
+| 1. "We don't want any trouble.  You'd best be leaving."
+| 2. "He ain't here.  Now get off our land!"
+| 3. "My dog!  You'll pay for this, you bastards!"
++---
+
+> 1
+
+"He ain't here," you say.  "Now get off our land, all of you!"
+
+"Don't you lie to me, boy," says Brown.  The lightning flashes again, 
+turning Brown into a spectral black silhouette for an instant.  When your 
+eyes recover, you are staring down the barrel of Brown's revolver.  "Don't
+you ever even *think* about lying to me, do you understand?"
+
+"Paw, what are you doing?" asks Oliver Brown.  "If you shoot the boy, the
+whole neighborhood will hear!"
+
+Brown stares into your eyes for a moment, then turns away.  "Keep him 
+quiet," he orders.  
