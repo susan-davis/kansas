@@ -1,5 +1,5 @@
 {:name   "kansas"
- :target :zblorb
+ :target [:zblorb :aa]
  :build
  {:zblorb
   {:options ["--cover"     "tragic-prelude.png"
@@ -15,4 +15,4 @@
  {:main    ["src/meta.dg" "src/kansas.dg"]
   :test    ["src/unit-tests.dg" "src/unit.dg"]
   :debug   ["src/stddebug.dg"]
-  :library ["src/stdlib.dg"]}}
+  :library ["src/grid.dg" "src/d6.dg" "src/time.dg" "src/utils.dg" "src/stdlib.dg"]}}
