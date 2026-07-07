@@ -13,6 +13,6 @@
 			    feet."]}}
  :sources
  {:main    ["src/meta.dg" "src/kansas.dg"]
-  :test    ["src/unit-tests.dg" "src/unit.dg"]
+  :test    ["src/d6-tests.dg" "src/time-tests.dg" "src/utils-tests.dg" "src/grid-tests.dg" "src/unit-tests.dg" "src/unit.dg"]
   :debug   ["src/stddebug.dg"]
   :library ["src/grid.dg" "src/d6.dg" "src/time.dg" "src/utils.dg" "src/stdlib.dg"]}}
